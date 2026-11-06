@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent
 def clean_data():
 
     # 1. read the data
-    input_path = BASE_DIR / "imdb_top_1000.csv"
+    input_path = BASE_DIR / "imdb_top_1000 (1).csv"
     df = pd.read_csv(input_path)
 
     print("Original movie count:", len(df))
