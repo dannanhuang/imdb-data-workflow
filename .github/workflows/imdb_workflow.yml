@@ -1,0 +1,75 @@
+name: IMDb Data Workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  data-cleaning:
+    name: Data cleaning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run data cleaning
+        run: python data_cleaning.py
+
+      - name: Save cleaned data
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleaned-data
+          path: data/imdb_cleaned.csv
+          if-no-files-found: error
+
+  data-processing:
+    name: Data processing and analysis
+    needs: data-cleaning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Download cleaned data
+        uses: actions/download-artifact@v4
+        with:
+          name: cleaned-data
+          path: data
+
+      - name: Calculate indicators
+        run: python data_processing.py
+
+      - name: Generate HTML dashboard
+        run: python data_analysis.py
+
+      - name: Save dashboard and indicators
+        uses: actions/upload-artifact@v4
+        with:
+          name: imdb-dashboard
+          path: |
+            output/dashboard.html
+            results/
+          if-no-files-found: error
